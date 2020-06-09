@@ -47,7 +47,7 @@ architecture arch of keyboard_tb is
     process
         procedure send_code( sc : std_logic_vector(7 downto 0) ) is
         begin
-            kbd_clk <= 'H';
+            kbd_clk <= '1';
             kbd_data <= 'H';
 
             wait for (bit_period/2);
