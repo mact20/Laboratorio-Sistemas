@@ -38,11 +38,17 @@ clk_filter : process
 --Checamos la paridad de la cantidad escaneada
 parity<=scan_code(7) xor(scan_code(6) xor(scan_code(5) xor (scan_code(4) xor(scan_code(3) xor(scan_code(2) xor (scan_code(1) xor(scan_code(0) xor '1')))))));
 
-	 
+process(incount) begin
+if incount ="1000" then
+scan_code <= shiftin(8 downto 1);
+end if;
+end process;
+
 -- Lectura de la información serial del dispositivo
 
 process(kbd_clk_filtered) begin
 if falling_edge(kbd_clk_filtered) then
+-- estado idle
  if actual=S0 then
   if reset='1' then
    incount <= "0000";
@@ -55,6 +61,7 @@ if falling_edge(kbd_clk_filtered) then
   end if;
  end if;
  
+--estado de conteo y recopilacion de bits de la tecla
  if actual=S1 then
   if enable<='1' then
    scan_ready<='0';
@@ -62,15 +69,14 @@ if falling_edge(kbd_clk_filtered) then
   if read_char = '1' then
    if incount < "1001" then
 	 incount <= incount + 1;
-    shiftin(7 downto 0) <= shiftin(8 downto 1);
-    shiftin(8) <= kbd_data;
-    ready_set <= '0';
+         shiftin(7 downto 0) <= shiftin(8 downto 1);
+         shiftin(8) <= kbd_data;
+         ready_set <= '0';
 	 future<=S1;
 	else
-	 scan_code <= shiftin(7 downto 0);
-    read_char <= '0';
-    ready_set <= '1';
-    incount <= "0000";
+        read_char <= '0';
+        ready_set <= '1';
+        incount <= "0000";
 	 future<=S0;
 	 scan_ready <= '1';
 	end if;
